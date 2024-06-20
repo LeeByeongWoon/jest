@@ -2,7 +2,7 @@ export default class CustomError extends Error {
     constructor(
         message?: string,
         public name: string = Error.name,
-        cause: string = ''
+        public cause: string = ''
     ) {
         super(message);
         this.name = name;

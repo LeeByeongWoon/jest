@@ -51,6 +51,7 @@ const main = () => {
 
     greeting('world');
     console.log('프로그램이 종료 되었습니다.');
+    console.log('aa');
 };
 
 main();
