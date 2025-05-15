@@ -30,5 +30,4 @@ export const getOrElse = <A>(oa: Option<A>, defaultValue: A): A => {
 
 export const optionMap = <A, B>(oa: Option<A>, f: (a: A) => B): Option<B> => (isSome(oa) ? some(f(oa.value)) : none());
 
-export const mapOrElse = <A, B>(oa: Option<A>, f: (a: A) => B, defaultValue: B): B =>
-    getOrElse(optionMap(oa, f), defaultValue);
+export const mapOrElse = <A, B>(oa: Option<A>, f: (a: A) => B, defaultValue: B): B => getOrElse(optionMap(oa, f), defaultValue);

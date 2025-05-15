@@ -6,19 +6,25 @@ type Async<A> = (ret: (x: A) => void) => void;
 
 //Async<void> = (ret: (x: undefined)=> void) => void;
 
-const f = (str: string): Promise<number> =>
-    new Promise((resolve, reject) => {
-        if (str === '') {
-            reject('빈 문자열은 입력 할 수 없습니다.');
-            return;
-        }
-        setTimeout(() => {
-            console.log('f : ' + str);
-            resolve(str.length * 2);
-        }, 500);
-    });
+const resolve = <A>(a: A): Async<A> => {
+    return (ret) => {
+        ret(a);
+    };
+};
 
-const asyncF =
+const flatMap = <A, B>(a: Async<A>, f: (a: A) => Async<B>): Async<B> => {
+    return (ret) => {
+        a((a_) => {
+            const b = f(a_);
+            b((b_) => ret(b_));
+        });
+    };
+};
+const map = <A, B>(a: Async<A>, f: (a: A) => B): Async<B> => {
+    return flatMap(a, (a_) => resolve(f(a_)));
+};
+
+const f =
     (str: string): Async<number> =>
     (resolve) => {
         setTimeout(() => {
@@ -30,29 +36,23 @@ const asyncF =
 // f(str)=> (fn:(a) => void) => void;
 //
 
-const g = (n: number): Promise<number> =>
-    new Promise((resolve, reject) => {
-        if (n === 6) {
-            reject('6은 입력할 수 없습니다.');
-            return;
-        }
+const g =
+    (n: number): Async<number> =>
+    (resolve) => {
         setTimeout(() => {
             console.log('g : ' + n);
             resolve(n + 1);
         }, 500);
-    });
+    };
 
-const h = (x: number): Promise<boolean> =>
-    new Promise((resolve, reject) => {
-        if (x === 5) {
-            reject('5는 입력할 수 없습니다.');
-            return;
-        }
+const h =
+    (x: number): Async<boolean> =>
+    (resolve) => {
         setTimeout(() => {
             console.log('h : ' + x);
             resolve(x % 3 === 3);
         }, 500);
-    });
+    };
 
 const handleError = (e: unknown) => {
     console.log('handleError: ' + e);
@@ -98,13 +98,19 @@ export const promiseFunc = async () => {
     // } catch (e) {
     //     console.log(e);
     // }
+    const runfunc = () => {
+        return;
+    };
 
     // f('abcd').then(g).then(h).then(program).catch(handleError);
-    // const a = f('abcd');
-    // const b = flatMap(a, (a_) => g(a_));
-    // const c = flatMap(b, (b_) => h(b_));
-    // const result = map(c, (c_) => program(c_));
-    // run(result);
+    const a = f('abcd');
+    const b = flatMap(a, g);
+    const c = flatMap(b, h);
+    // a - b - c - d 연달아 실행 되는 lazy 상태
+    // d(c(b(a)))
+    // return 이 언제 될 지 모르므로, 값이 반환 되면 전달 됨 ==> async 타입
+    const d = map(c, program);
+    run(d);
     // run(result);
 
     greeting('world');
